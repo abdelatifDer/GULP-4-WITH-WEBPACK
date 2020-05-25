@@ -1,3 +1,7 @@
 import a from "./modules/Number";
 
-console.log(a);
+function consoleA() {
+  console.log(a);
+}
+
+consoleA();
