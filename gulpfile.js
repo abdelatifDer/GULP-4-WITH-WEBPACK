@@ -34,18 +34,18 @@ const paths = {
   stylesPaths: {
     src: "./src/scss/*.scss",
     dest: "./dist/css",
-    watch: "./src/scss/**/*.scss"
+    watch: "./src/scss/**/*.scss",
   },
   scriptsPaths: {
     src: "./src/js/App.js",
     dest: "./dist/js",
-    watch: "./src/js/**/*.js"
+    watch: "./src/js/**/*.js",
   },
   markupPaths: {
     src: "./src/views/pages/*.pug",
     dest: "./dist",
-    watch: "./src/views/**/*.pug"
-  }
+    watch: "./src/views/**/*.pug",
+  },
 };
 
 // -----------------------------------------------
@@ -72,14 +72,14 @@ const markupClean = () => {
 // -----------------------------------------------
 // clean assests
 // -----------------------------------------------
-const assestsClean = () => {
-  return del(["./dist/assests"]);
+const assetsClean = () => {
+  return del(["./dist/assets"]);
 };
 
 // -----------------------------------------------
 // start SASS task
 // -----------------------------------------------
-const sassCompiler = done => {
+const sassCompiler = (done) => {
   let outputStyle;
 
   if (development()) outputStyle = "Nested ";
@@ -91,7 +91,7 @@ const sassCompiler = done => {
       development(sourcemaps.init()),
       sass({ outputStyle }).on("error", sass.logError),
       production(
-        cleanCss({ debug: true }, details => {
+        cleanCss({ debug: true }, (details) => {
           if (details.error) {
             console.log(chalk.red(`Error: ${details.error[0]}`));
           } else {
@@ -107,7 +107,7 @@ const sassCompiler = done => {
       autoPrefixer(),
       concat("main.css"),
       development(sourcemaps.write()),
-      dest(paths.stylesPaths.dest)
+      dest(paths.stylesPaths.dest),
     ],
     done
   );
@@ -116,7 +116,7 @@ const sassCompiler = done => {
 // -----------------------------------------------
 // START SCRIPTS TASK
 // -----------------------------------------------
-const scripts = done => {
+const scripts = (done) => {
   let mode = undefined;
 
   if (development()) mode = "development";
@@ -128,11 +128,11 @@ const scripts = done => {
       development(sourcemaps.init()),
       webpackStream({
         ...config,
-        mode
+        mode,
       }),
       production(uglify()),
       development(sourcemaps.write()),
-      dest(paths.scriptsPaths.dest)
+      dest(paths.scriptsPaths.dest),
     ],
     done
   );
@@ -141,7 +141,7 @@ const scripts = done => {
 // -----------------------------------------------
 // START MARKUP TASK
 // -----------------------------------------------
-const markup = done => {
+const markup = (done) => {
   let pretty;
 
   if (production()) pretty = false;
@@ -151,9 +151,9 @@ const markup = done => {
     [
       src(paths.markupPaths.src),
       pug({
-        pretty
+        pretty,
       }),
-      dest(paths.markupPaths.dest)
+      dest(paths.markupPaths.dest),
     ],
     done
   );
@@ -162,8 +162,8 @@ const markup = done => {
 // -----------------------------------------------
 // START IMAGES TASK
 // -----------------------------------------------
-const imagesTask = done => {
-  pump([src("./src/assests/**/*"), image(), dest("./dist/assests")], done);
+const imagesTask = (done) => {
+  pump([src("./src/assets/**/*"), image(), dest("./dist/assets")], done);
 };
 
 // -----------------------------------------------
@@ -172,7 +172,7 @@ const imagesTask = done => {
 exports.scriptsClean = series(scriptsClean);
 exports.stylesClean = series(stylesClean);
 exports.markupClean = series(markupClean);
-exports.assestsClean = series(assestsClean);
+exports.assetsClean = series(assetsClean);
 
 // -----------------------------------------------
 // Other tasks
@@ -183,10 +183,10 @@ exports.markup = series(markup);
 exports.images = series(imagesTask);
 
 // SET ALL WATCHERS
-exports.setWatchers = done => {
+exports.setWatchers = (done) => {
   // initialize the browser sync
   browserSync.init({
-    server: "./dist"
+    server: "./dist",
   });
 
   // watch the style files
@@ -211,12 +211,12 @@ exports.setWatchers = done => {
 
   // watch for any changes in assests folder
   const watchImages = watch(
-    ["./src/assests/**/*"],
+    ["./src/assets/**/*"],
     { ignoreInitial: true },
     exports.images
   );
 
-  watchImages.on("unlink", srcPath => {
+  watchImages.on("unlink", (srcPath) => {
     del(["./" + srcPath.replace("src", "dist")]);
     browserSync.reload();
   });
@@ -235,7 +235,7 @@ exports.default = series(
   scriptsClean,
   stylesClean,
   markupClean,
-  assestsClean,
+  assetsClean,
 
   // chainin main tasks
   parallel(sassCompiler, scripts, markup, imagesTask),
